@@ -179,7 +179,7 @@
 
 // Read the input pins for the BIOS patch
 #define PIN_AX_READ                (PIND   &   (1<<PIND2))    // Read the state of PIND2                     
-#define PIN_AY_READ                (PIND   &   (1<<PIND3))    // Read the state of PIND3                       
+#define PIN_AY_READ                (PIND   &   (1<<PIND3))                       
 
 // External interrupt configuration for BIOS patch
 #define PIN_AX_INTERRUPT_ENABLE     EIMSK  |=  (1<<INT0)      // Enable external interrupt on INT0 (PINB2)
@@ -356,6 +356,8 @@
 #if !defined(SCPH_xxx1) && !defined(SCPH_xxx2) && !defined(SCPH_103) && !defined(SCPH_xxxx)
  #error "ATtiny85_45_25 Not compatible with BIOS patch"
 #endif
+
+#endif  // ATtiny85_45_25
 
 
 // *****************************************************************************************************************
@@ -750,5 +752,117 @@
 #define PIN_SWICHE_READ            (GPIOA->IDR   &   (GPIO_IDR_IDR_5))
 
 #endif
+
+#ifdef RP2040
+
+// Define the clock speed for the RP2040 microcontroller
+#ifndef F_CPU
+#define F_CPU 133000000L  // RP2040 typically runs at 133MHz
+#endif
+
+#include <Arduino.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+// Timer related definitions
+#define TIMER_TCNT_CLEAR            // No direct timer count register on RP2040 via Arduino
+#define SET_OCROA_DIV               // Handled in setup code
+#define SET_TIMER_TCCROA            // Handled in setup code
+#define SET_TIMER_TCCROB            // Handled in setup code
+#define CTC_TIMER_VECTOR            // Handled via attachInterrupt
+
+// Global interrupt control settings
+#define GLOBAL_INTERRUPT_ENABLE     interrupts()
+#define GLOBAL_INTERRUPT_DISABLE    noInterrupts()
+
+// Define pin numbers for the RP2040 - adjust these to match your wiring
+#define PIN_DATA                    2    // GP2
+#define PIN_WFCK                    3    // GP3
+#define PIN_SQCK                    4    // GP4  
+#define PIN_SUBQ                    5    // GP5
+
+// RP2040-Zero has the onboard LED on GPIO17, different from Pico's GPIO25
+#if defined(ARDUINO_RASPBERRY_PI_PICO)
+  #define PIN_LED                   25   // Pico's onboard LED
+#else
+  #define PIN_LED                   17   // RP2040-Zero's onboard LED
+#endif
+
+// Main pin configuration for input and output
+#define PIN_DATA_INPUT              pinMode(PIN_DATA, INPUT)
+#define PIN_WFCK_INPUT              pinMode(PIN_WFCK, INPUT)
+#define PIN_SQCK_INPUT              pinMode(PIN_SQCK, INPUT)
+#define PIN_SUBQ_INPUT              pinMode(PIN_SUBQ, INPUT)
+                            
+// Output configuration
+#define PIN_DATA_OUTPUT             pinMode(PIN_DATA, OUTPUT)
+#define PIN_WFCK_OUTPUT             pinMode(PIN_WFCK, OUTPUT)
+           
+// Setting pins high
+#define PIN_DATA_SET                digitalWrite(PIN_DATA, HIGH)
+             
+// Setting pins low
+#define PIN_DATA_CLEAR              digitalWrite(PIN_DATA, LOW)
+#define PIN_WFCK_CLEAR              digitalWrite(PIN_WFCK, LOW)
+                         
+// Reading pin states
+#define PIN_SQCK_READ               digitalRead(PIN_SQCK)
+#define PIN_SUBQ_READ               digitalRead(PIN_SUBQ)
+#define PIN_WFCK_READ               digitalRead(PIN_WFCK)
+
+// LED pin handling
+#define PIN_LED_OUTPUT              pinMode(PIN_LED, OUTPUT)
+#define PIN_LED_ON                  digitalWrite(PIN_LED, HIGH)
+#define PIN_LED_OFF                 digitalWrite(PIN_LED, LOW)
+
+// Timer interrupt handling
+#define TIMER_INTERRUPT_ENABLE      // Handled in code via attachInterrupt
+#define TIMER_INTERRUPT_DISABLE     // Handled in code via detachInterrupt
+#define TIMER_TIFR_CLEAR            // Not applicable for RP2040
+
+// BIOS patching pins - only needed if using BIOS_PATCH feature
+#define PIN_AX                      6    // GP6
+#define PIN_AY                      7    // GP7
+#define PIN_DX                      8    // GP8
+#define PIN_SWITCH                  9    // GP9
+
+// Define input pins for the BIOS patch
+#define PIN_AX_INPUT                pinMode(PIN_AX, INPUT)
+#define PIN_AY_INPUT                pinMode(PIN_AY, INPUT)
+#define PIN_DX_INPUT                pinMode(PIN_DX, INPUT)
+
+// Define output pins for the BIOS patch
+#define PIN_DX_OUTPUT               pinMode(PIN_DX, OUTPUT)
+
+// Set pins high
+#define PIN_DX_SET                  digitalWrite(PIN_DX, HIGH)
+
+// Set pins low
+#define PIN_DX_CLEAR                digitalWrite(PIN_DX, LOW)
+
+// Read pins
+#define PIN_AX_READ                 digitalRead(PIN_AX)
+#define PIN_AY_READ                 digitalRead(PIN_AY)
+
+// External interrupt configuration - handled differently on RP2040
+#define PIN_AX_INTERRUPT_ENABLE     // Handled in code via attachInterrupt
+#define PIN_AY_INTERRUPT_ENABLE     // Handled in code via attachInterrupt
+#define PIN_AX_INTERRUPT_DISABLE    // Handled in code via detachInterrupt
+#define PIN_AY_INTERRUPT_DISABLE    // Handled in code via detachInterrupt
+
+// Interrupt trigger modes
+#define PIN_AX_INTERRUPT_RISING     // Handled in code via attachInterrupt(PIN_AX, ax_isr, RISING)
+#define PIN_AY_INTERRUPT_RISING     // Handled in code via attachInterrupt(PIN_AY, ay_isr, RISING)
+#define PIN_AX_INTERRUPT_FALLING    // Handled in code via attachInterrupt(PIN_AX, ax_isr, FALLING)
+#define PIN_AY_INTERRUPT_FALLING    // Handled in code via attachInterrupt(PIN_AY, ay_isr, FALLING)
+
+// Not used as we're using function pointers
+#define PIN_AX_INTERRUPT_VECTOR     // Not applicable for RP2040
+#define PIN_AY_INTERRUPT_VECTOR     // Not applicable for RP2040
+
+// Switch input configuration
+#define PIN_SWITCH_INPUT            pinMode(PIN_SWITCH, INPUT_PULLUP)
+#define PIN_SWITCH_SET              // Not applicable, using INPUT_PULLUP
+#define PIN_SWICHE_READ             digitalRead(PIN_SWITCH)
 
 #endif
