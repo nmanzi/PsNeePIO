@@ -61,6 +61,18 @@
   Pin6-SUBQ (MISO)
   Pin7_DATA (SCK)
   Pin8-VCC
+
+  Pinout RP2040:
+  GPIO2 - DATA
+  GPIO3 - WFCK
+  GPIO4 - SQCK
+  GPIO5 - SUBQ
+  3.3V - VCC
+  GND - GND
+  GPIO6 - BIOS AX
+  GPIO7 - BIOS AY (Only for BIOS ver. 1.0j-1.1j)
+  GPIO8 - BIOS DX
+  GPIO9 - Switch* (Optional for disabling BIOS patch)
 */
 
 #include <BIOS_patching.h>
