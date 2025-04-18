@@ -853,4 +853,16 @@
 #define PIN_SWITCH_SET              // Not applicable, using INPUT_PULLUP
 #define PIN_SWITCH_READ             digitalRead(PIN_SWITCH)
 
+// The RP2040 Zero uses a NeoPixel (WS2812B) as an onboard LED
+Adafruit_NeoPixel pixels(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800); // Create a NeoPixel object
+
+// Arduino-style delay functions for RP2040
+#define _delay_us(us) delayMicroseconds(us)
+#define _delay_ms(ms) delay(ms)
+
+// Variables for tracking time in RP2040 implementation
+unsigned long timer_start_micros = 0;
+unsigned long timer_start_millis = 0;
+bool timer_running = false;
+
 #endif

@@ -75,9 +75,9 @@
   GPIO9 - Switch* (Optional for disabling BIOS patch)
 */
 
-#include <BIOS_patching.h>
 #include <MUC.h>
 #include <settings.h>
+#include <BIOS_patching.h>
 
 //------------------------------------------------------------------------------------------------
 //                         Options
@@ -106,26 +106,6 @@ volatile bool Flag_Switch = 0;      // This variable is used to determine the st
 volatile uint8_t count_isr = 0;
 volatile uint32_t microsec = 0;
 volatile uint16_t millisec = 0;
-
-#ifdef rp2040zero
-
-// The RP2040 Zero uses a NeoPixel (WS2812B) as an onboard LED
-Adafruit_NeoPixel pixels(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800); // Create a NeoPixel object
-
-// Arduino-style delay functions for RP2040
-#define _delay_us(us) delayMicroseconds(us)
-#define _delay_ms(ms) delay(ms)
-
-// Variables for tracking time in RP2040 implementation
-unsigned long timer_start_micros = 0;
-unsigned long timer_start_millis = 0;
-bool timer_running = false;
-
-// Function pointers for interrupt handling
-void (*ax_isr_ptr)(void) = NULL;
-void (*ay_isr_ptr)(void) = NULL;
-
-#endif
 
 //------------------------------------------------------------------------------------------------
 //                         Code section
@@ -215,23 +195,6 @@ void Timer_Stop()
 }
 
 #elif defined(rp2040zero)
-
-// ISR functions for external interrupts on RP2040
-void ax_interrupt_handler()
-{
-  if (ax_isr_ptr != NULL)
-  {
-    ax_isr_ptr();
-  }
-}
-
-void ay_interrupt_handler()
-{
-  if (ay_isr_ptr != NULL)
-  {
-    ay_isr_ptr();
-  }
-}
 
 // Timer functions for RP2040
 void Timer_Start()

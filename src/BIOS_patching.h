@@ -8,18 +8,33 @@ void Timer_Stop(void);
 extern volatile uint8_t count_isr;
 extern volatile uint32_t microsec;
 
-#ifdef rp2040zero
-// For RP2040, we need to call this to update timer values
-extern void update_timer_vars(void);
-#endif
-
 volatile uint8_t impulse = 0;
 volatile uint8_t patch = 0;
 
 #ifdef rp2040zero
-// For RP2040, we need to handle interrupts through function pointers
-extern void (*ax_isr_ptr)(void);
-extern void (*ay_isr_ptr)(void);
+// For RP2040, we need to call this to update timer values
+extern void update_timer_vars(void);
+
+// Function pointers for interrupt handling
+void (*ax_isr_ptr)(void) = NULL;
+void (*ay_isr_ptr)(void) = NULL;
+
+// ISR functions for external interrupts on RP2040
+void ax_interrupt_handler()
+{
+  if (ax_isr_ptr != NULL)
+  {
+    ax_isr_ptr();
+  }
+}
+
+void ay_interrupt_handler()
+{
+  if (ay_isr_ptr != NULL)
+  {
+    ay_isr_ptr();
+  }
+}
 
 // External interrupts for RP2040
 void ax_isr() {
@@ -59,13 +74,13 @@ void ay_isr() {
 #endif
 
 // In RP2040, we'll assign these functions to the function pointers
-void enable_ax_interrupt(int mode) {
+void enable_ax_interrupt(PinStatus mode) {
   ax_isr_ptr = ax_isr;
   attachInterrupt(digitalPinToInterrupt(PIN_AX), ax_interrupt_handler, mode);
 }
 
 #ifdef HIGH_PATCH
-void enable_ay_interrupt(int mode) {
+void enable_ay_interrupt(PinStatus mode) {
   ay_isr_ptr = ay_isr;
   attachInterrupt(digitalPinToInterrupt(PIN_AY), ay_interrupt_handler, mode);
 }
