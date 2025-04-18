@@ -87,7 +87,7 @@
                           // ATtiny add a led between PB3 (pin 2) and gnd with a 1k resistor in series, 
                           // ATmega32U4 (Pro Micro) add a led between PB6 (pin 10) and gnd with a 1k resistor in series.
                           // For the RP2040-Zero, the onboard NeoPixel will light up when the LED_RUN option is enabled.
-// #define PATCH_SWICHE   // Enables hardware support for disabling BIOS patching. Useful in rare cases where the BIOS patch prevents the playback of original games
+// #define PATCH_SWITCH   // Enables hardware support for disabling BIOS patching. Useful in rare cases where the BIOS patch prevents the playback of original games
 
 //------------------------------------------------------------------------------------------------
 //                         pointer and variable section
@@ -98,7 +98,7 @@
 #define HYSTERESIS_MAX 17           // The sweet spot is between 11~19. All models have bad behavior below 11, PU-41 can start to have bad behavior beyond 20, for fat models we can go up to 60
                                     // On fat models if your reader is really bad you can increase this value in steps of 5.
 
-// Creation of the different variables for the counter
+// Switches
 volatile bool wfck_mode = 0;        // This variable is used to determine the mode of the wfck pin
 volatile bool Flag_Switch = 0;      // This variable is used to determine the state of the HW switch
 
@@ -396,11 +396,12 @@ void Init()
   SET_TIMER_TCCROB;
 #endif
 
-#if defined(PATCH_SW) && defined(BIOS_PATCH)
+#if defined(PATCH_SWITCH) && defined(BIOS_PATCH)
   PIN_SWITCH_INPUT;
   PIN_SWITCH_SET;
-  if (PIN_SWICHE_READ = 0)
+  if (PIN_SWITCH_READ = 0)
   {
+    // Switch is off, disable patching
     Flag_Switch = 1;
   }
 #endif

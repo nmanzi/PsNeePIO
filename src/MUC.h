@@ -201,7 +201,7 @@
 // Handle switch input for BIOS patch
 #define PIN_SWITCH_INPUT            DDRD   &= ~(1<<DDD5)      // Configure PIND5 as input for switch                      
 #define PIN_SWITCH_SET              PORTD  |=  (1<<PD5)       // Set PIND5 high (enable pull-up)            
-#define PIN_SWICHE_READ            (PIND   &   (1<<PIND5))    // Read the state of PIND5 (switch input)
+#define PIN_SWITCH_READ            (PIND   &   (1<<PIND5))    // Read the state of PIND5 (switch input)
 
 #endif
 
@@ -273,7 +273,7 @@
 // Handling and reading the switch pin for patch BIOS
 #define PIN_SWITCH_INPUT            DDRC   &= ~(1<<DDC6)                              
 #define PIN_SWITCH_SET              PORTC  |=  (1<<PC6)                                
-#define PIN_SWICHE_READ            (PINC   &   (1<<PINC6))
+#define PIN_SWITCH_READ            (PINC   &   (1<<PINC6))
 
 // BIOS timer clear
 #define TIMER_TCNT_CLEAR            TCNT0  =    0x00
@@ -460,7 +460,7 @@
 // Handling and reading the switch pin for patch BIOS
 #define PIN_SWITCH_INPUT            DDRD   &= ~(1<<DDD5)                              
 #define PIN_SWITCH_SET              PORTD  |=  (1<<PD5)                                
-#define PIN_SWICHE_READ            (PIND   &   (1<<PIND5))
+#define PIN_SWITCH_READ            (PIND   &   (1<<PIND5))
 
 #endif
 
@@ -563,7 +563,7 @@
 // Handling and reading the switch pin for patch BIOS
 #define PIN_SWITCH_INPUT            PORTA.DIR &= ~PIN5_bm                               
 #define PIN_SWITCH_SET              PORTA.OUT |= PIN5_bm                                 
-#define PIN_SWICHE_READ            PORTA.IN & PIN5_bm 
+#define PIN_SWITCH_READ            PORTA.IN & PIN5_bm 
 
 #endif
 
@@ -661,7 +661,7 @@
 // Handling and reading the switch pin for patch BIOS
 #define PIN_SWITCH_INPUT            DDRD   &= ~(1<<DDD5)                              
 #define PIN_SWITCH_SET              PORTD  |=  (1<<PD5)                                
-#define PIN_SWICHE_READ            (PIND   &   (1<<PIND5))
+#define PIN_SWITCH_READ            (PIND   &   (1<<PIND5))
 
 #endif
 
@@ -748,7 +748,7 @@
 // Gestion de la broche de commutation pour le BIOS
 #define PIN_SWITCH_INPUT            GPIOA->MODER &= ~(GPIO_MODER_MODER5)                              
 #define PIN_SWITCH_SET              GPIOA->ODR  |=  (GPIO_ODR_ODR_5)                                
-#define PIN_SWICHE_READ            (GPIOA->IDR   &   (GPIO_IDR_IDR_5))
+#define PIN_SWITCH_READ            (GPIOA->IDR   &   (GPIO_IDR_IDR_5))
 
 #endif
 
@@ -851,6 +851,6 @@
 // Switch input configuration
 #define PIN_SWITCH_INPUT            pinMode(PIN_SWITCH, INPUT_PULLUP)
 #define PIN_SWITCH_SET              // Not applicable, using INPUT_PULLUP
-#define PIN_SWICHE_READ             digitalRead(PIN_SWITCH)
+#define PIN_SWITCH_READ             digitalRead(PIN_SWITCH)
 
 #endif
