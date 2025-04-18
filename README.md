@@ -36,10 +36,11 @@ This project is a PlatformIO port of [kalymos' PsNee](https://github.com/kalymos
 ## Hardware Requirements
 
 ### Microcontroller Options
-- Arduino Pro Mini 8MHz (ATmega328)
-- Arduino Leonardo/Micro (ATmega32U4)
+- Arduino Nano & Pro Mini (ATmega328)
+- Arduino Micro (ATmega32U4)
 - ATtiny85/45/25
 - Raspberry Pi Pico (RP2040)
+  - Waveshare RP2040-Zero
 
 ### Recommended Fuse Settings
 - ATmega - H: DF, L: EE, E: FD
@@ -68,28 +69,11 @@ This project is a PlatformIO port of [kalymos' PsNee](https://github.com/kalymos
 - Pin7-DATA (SCK)
 - Pin8-VCC
 
-### Pinout for Raspberry Pi Pico (RP2040)
-- GPIO2 (Pin 4) - DATA
-- GPIO3 (Pin 5) - WFCK
-- GPIO4 (Pin 6) - SQCK
-- GPIO5 (Pin 7) - SUBQ
-- GPIO25 (Pin 35) - LED (built-in on Pico)
-- 3.3V - VCC
-- GND - GND
-
-For BIOS patching (only needed for certain models):
-- GPIO6 (Pin 9) - BIOS AX
-- GPIO7 (Pin 10) - BIOS AY (Only for BIOS ver. 1.0j-1.1j)
-- GPIO8 (Pin 11) - BIOS DX
-- GPIO9 (Pin 12) - Switch* (Optional for disabling BIOS patch)
-
 ### Pinout for RP2040-Zero Board
-The RP2040-Zero is also supported with the same GPIO pin assignments but with a different LED pin:
 - GPIO2 - DATA
 - GPIO3 - WFCK
 - GPIO4 - SQCK
 - GPIO5 - SUBQ
-- GPIO17 - LED (built-in on RP2040-Zero)
 - 3.3V - VCC
 - GND - GND
 
