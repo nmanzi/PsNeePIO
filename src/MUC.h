@@ -753,7 +753,7 @@
 
 #endif
 
-#ifdef RP2040
+#ifdef rp2040zero
 
 // Define the clock speed for the RP2040 microcontroller
 #ifndef F_CPU
@@ -763,6 +763,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <Adafruit_NeoPixel.h>
 
 // Timer related definitions
 #define TIMER_TCNT_CLEAR            // No direct timer count register on RP2040 via Arduino
@@ -780,13 +781,6 @@
 #define PIN_WFCK                    3    // GP3
 #define PIN_SQCK                    4    // GP4  
 #define PIN_SUBQ                    5    // GP5
-
-// RP2040-Zero has the onboard LED on GPIO17, different from Pico's GPIO25
-#if defined(ARDUINO_RASPBERRY_PI_PICO)
-  #define PIN_LED                   25   // Pico's onboard LED
-#else
-  #define PIN_LED                   17   // RP2040-Zero's onboard LED
-#endif
 
 // Main pin configuration for input and output
 #define PIN_DATA_INPUT              pinMode(PIN_DATA, INPUT)
@@ -809,11 +803,6 @@
 #define PIN_SQCK_READ               digitalRead(PIN_SQCK)
 #define PIN_SUBQ_READ               digitalRead(PIN_SUBQ)
 #define PIN_WFCK_READ               digitalRead(PIN_WFCK)
-
-// LED pin handling
-#define PIN_LED_OUTPUT              pinMode(PIN_LED, OUTPUT)
-#define PIN_LED_ON                  digitalWrite(PIN_LED, HIGH)
-#define PIN_LED_OFF                 digitalWrite(PIN_LED, LOW)
 
 // Timer interrupt handling
 #define TIMER_INTERRUPT_ENABLE      // Handled in code via attachInterrupt

@@ -12,7 +12,7 @@
 
 // Here the regions are specified
 // #define SCPH_xxx1        // Use for all NTSC-U/C models. No BIOS patching needed.
-#define SCPH_xxx2 // Use for all PAL FAT models. No BIOS patching needed.
+// #define SCPH_xxx2        // Use for all PAL FAT models. No BIOS patching needed.
 // #define SCPH_103         // Maybe for all SCPH_xxx3 but I have no info.
 
 // And all models that require a BIOS patch
@@ -31,7 +31,7 @@
 // #define ATmega328_168
 // #define ATmega32U4_16U4
 // #define ATtiny85_45_25
-#define RP2040 // Define that we're using the RP2040 microcontroller
+// #define rp2040zero
 
 /*
   Fuses:
@@ -65,8 +65,10 @@
 #include <MUC.h>
 #include <settings.h>
 
-#ifdef RP2040
-#include <Arduino.h>
+#ifdef rp2040zero
+
+// The RP2040 Zero uses a NeoPixel (WS2812B) as an onboard LED
+Adafruit_NeoPixel pixels(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800); // Create a NeoPixel object
 
 // Arduino-style delay functions for RP2040
 #define _delay_us(us) delayMicroseconds(us)
@@ -92,8 +94,11 @@ void (*ay_isr_ptr)(void) = NULL;
 //                         Options
 //------------------------------------------------------------------------------------------------
 
-#define LED_RUN // Turns on the LED when injections occur. D13 for Arduino, ATtiny add a led between PB3 (pin 2) and gnd with a 1k resistor in series, ATmega32U4 (Pro Micro) add a led between PB6 (pin 10) and gnd with a 1k resistor in series
-// #define PATCH_SWICHE  // Enables hardware support for disabling BIOS patching. Useful in rare cases where the BIOS patch prevents the playback of original games
+#define LED_RUN           // Turns on the LED when injections occur. D13 for Arduino, 
+                          // ATtiny add a led between PB3 (pin 2) and gnd with a 1k resistor in series, 
+                          // ATmega32U4 (Pro Micro) add a led between PB6 (pin 10) and gnd with a 1k resistor in series.
+                          // For the RP2040-Zero, the onboard NeoPixel will light up when the LED_RUN option is enabled.
+// #define PATCH_SWICHE   // Enables hardware support for disabling BIOS patching. Useful in rare cases where the BIOS patch prevents the playback of original games
 
 //------------------------------------------------------------------------------------------------
 //                         pointer and variable section
@@ -105,15 +110,14 @@ void (*ay_isr_ptr)(void) = NULL;
                                     // On fat models if your reader is really bad you can increase this value in steps of 5.
 
 // Creation of the different variables for the counter
-volatile bool wfck_mode = 0;
-
-volatile bool Flag_Switch = 0;
+volatile bool wfck_mode = 0;        // This variable is used to determine the mode of the wfck pin
+volatile bool Flag_Switch = 0;      // This variable is used to determine the state of the HW switch
 
 //------------------------------------------------------------------------------------------------
 //                         Code section
 //------------------------------------------------------------------------------------------------
 
-#if !defined(RP2040)
+#if !defined(rp2040zero)
 // *****************************************************************************************
 // Interrupt Service Routine: CTC_TIMER_VECTOR
 // Description:
@@ -196,7 +200,7 @@ void Timer_Stop()
 #endif
 }
 
-#elif defined(RP2040)
+#elif defined(rp2040zero)
 
 // ISR functions for external interrupts on RP2040
 void ax_interrupt_handler()
@@ -347,7 +351,7 @@ void inject_SCEX(const char region)
             PIN_DATA_CLEAR;
           }
 
-#ifdef RP2040
+#ifdef rp2040zero
           // Update timer variables for RP2040 implementation
           update_timer_vars();
 #endif
@@ -387,8 +391,13 @@ void Init()
   }
 #endif
 
-#ifdef LED_RUN
+#if defined(LED_RUN) && !defined(rp2040zero)
   PIN_LED_OUTPUT;
+#else
+  pixels.begin(); // Initialize the NeoPixel
+  pixels.setBrightness(50); // Set brightness to 50 (0-255)
+  pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
+  pixels.show(); // Update the NeoPixel to show the off state
 #endif
 
   GLOBAL_INTERRUPT_ENABLE;
@@ -411,17 +420,25 @@ int main()
 
 #if defined(BIOS_PATCH)
 
-#ifdef LED_RUN
+#if defined(LED_RUN) && !defined(rp2040zero)
   PIN_LED_ON;
+#else
+  pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // Set the NeoPixel to green
+  pixels.show(); // Update the NeoPixel to show the red color
 #endif
 
+  // Check if the switch is latched
+  // If the switch is not latched, we will patch the BIOS
   if (Flag_Switch == 0)
   {
     Bios_Patching();
   }
 
-#ifdef LED_RUN
+#if defined(LED_RUN) && !defined(rp2040zero)
   PIN_LED_OFF;
+#else
+  pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
+  pixels.show(); // Update the NeoPixel to show the off state
 #endif
 
 #endif
@@ -440,7 +457,7 @@ int main()
     if (PIN_WFCK_READ == 0)
       lows++; // good for ~5000 reads in 1s
     _delay_us(200);
-#ifdef RP2040
+#ifdef rp2040zero
     // Update timer variables for RP2040 implementation
     update_timer_vars();
 #endif
@@ -552,8 +569,11 @@ int main()
       // Executes the region code patch injection sequence.
       //************************************************************************
 
-#ifdef LED_RUN
+#if defined(LED_RUN) && !defined(rp2040zero)
       PIN_LED_ON;
+#else
+      pixels.setPixelColor(0, pixels.Color(0, 0, 255)); // Set the NeoPixel to blue
+      pixels.show(); // Update the NeoPixel to show the red color
 #endif
 
       PIN_DATA_OUTPUT;
@@ -580,8 +600,11 @@ int main()
 
       PIN_DATA_INPUT;
 
-#ifdef LED_RUN
+#if defined(LED_RUN) && !defined(rp2040zero)
       PIN_LED_OFF;
+#else
+      pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to black
+      pixels.show(); // Update the NeoPixel to show the red color
 #endif
     }
   }

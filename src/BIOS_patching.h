@@ -8,7 +8,7 @@ void Timer_Stop(void);
 extern volatile uint8_t count_isr;
 extern volatile uint32_t microsec;
 
-#ifdef RP2040
+#ifdef rp2040zero
 // For RP2040, we need to call this to update timer values
 extern void update_timer_vars(void);
 #endif
@@ -16,7 +16,7 @@ extern void update_timer_vars(void);
 volatile uint8_t impulse = 0;
 volatile uint8_t patch = 0;
 
-#ifdef RP2040
+#ifdef rp2040zero
 // For RP2040, we need to handle interrupts through function pointers
 extern void (*ax_isr_ptr)(void);
 extern void (*ay_isr_ptr)(void);
@@ -116,7 +116,7 @@ ISR(PIN_AY_INTERRUPT_VECTOR){
 
 void Bios_Patching(){
 
-#ifdef RP2040
+#ifdef rp2040zero
   // For RP2040, configure the interrupts differently
   #ifdef LOW_TRIGGER                
     enable_ax_interrupt(FALLING);          
