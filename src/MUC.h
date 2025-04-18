@@ -209,7 +209,6 @@
 #ifdef ATmega32U4_16U4
 
 #define F_CPU 16000000L
-#define TIMER_TCNT_CLEAR            TCNT0   =   0x00;
 #define SET_OCROA_DIV               OCR0A   =   159;
 #define SET_TIMER_TCCROA            TCCR0A |=  (1 << WGM01);
 #define SET_TIMER_TCCROB            TCCR0B |=  (1 << CS00);

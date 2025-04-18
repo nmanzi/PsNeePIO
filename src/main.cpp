@@ -12,7 +12,7 @@
 
 // Here the regions are specified
 // #define SCPH_xxx1        // Use for all NTSC-U/C models. No BIOS patching needed.
-// #define SCPH_xxx2        // Use for all PAL FAT models. No BIOS patching needed.
+#define SCPH_xxx2        // Use for all PAL FAT models. No BIOS patching needed.
 // #define SCPH_103         // Maybe for all SCPH_xxx3 but I have no info.
 
 // And all models that require a BIOS patch
@@ -27,6 +27,8 @@
 //------------------------------------------------------------------------------------------------
 //                         Select your chip
 //------------------------------------------------------------------------------------------------
+
+// PlatformIO will automatically select the correct chip based on the board you are using.
 
 // #define ATmega328_168
 // #define ATmega32U4_16U4
@@ -65,31 +67,6 @@
 #include <MUC.h>
 #include <settings.h>
 
-#ifdef rp2040zero
-
-// The RP2040 Zero uses a NeoPixel (WS2812B) as an onboard LED
-Adafruit_NeoPixel pixels(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800); // Create a NeoPixel object
-
-// Arduino-style delay functions for RP2040
-#define _delay_us(us) delayMicroseconds(us)
-#define _delay_ms(ms) delay(ms)
-
-// For RP2040, we need a different timer implementation approach
-// These variables are kept for compatibility with the existing code
-volatile uint8_t count_isr = 0;
-volatile uint32_t microsec = 0;
-volatile uint16_t millisec = 0;
-
-// Variables for tracking time in RP2040 implementation
-unsigned long timer_start_micros = 0;
-unsigned long timer_start_millis = 0;
-bool timer_running = false;
-
-// Function pointers for interrupt handling
-void (*ax_isr_ptr)(void) = NULL;
-void (*ay_isr_ptr)(void) = NULL;
-#endif
-
 //------------------------------------------------------------------------------------------------
 //                         Options
 //------------------------------------------------------------------------------------------------
@@ -112,6 +89,31 @@ void (*ay_isr_ptr)(void) = NULL;
 // Creation of the different variables for the counter
 volatile bool wfck_mode = 0;        // This variable is used to determine the mode of the wfck pin
 volatile bool Flag_Switch = 0;      // This variable is used to determine the state of the HW switch
+
+// Global variables for time tracking
+volatile uint8_t count_isr = 0;
+volatile uint32_t microsec = 0;
+volatile uint16_t millisec = 0;
+
+#ifdef rp2040zero
+
+// The RP2040 Zero uses a NeoPixel (WS2812B) as an onboard LED
+Adafruit_NeoPixel pixels(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800); // Create a NeoPixel object
+
+// Arduino-style delay functions for RP2040
+#define _delay_us(us) delayMicroseconds(us)
+#define _delay_ms(ms) delay(ms)
+
+// Variables for tracking time in RP2040 implementation
+unsigned long timer_start_micros = 0;
+unsigned long timer_start_millis = 0;
+bool timer_running = false;
+
+// Function pointers for interrupt handling
+void (*ax_isr_ptr)(void) = NULL;
+void (*ay_isr_ptr)(void) = NULL;
+
+#endif
 
 //------------------------------------------------------------------------------------------------
 //                         Code section
