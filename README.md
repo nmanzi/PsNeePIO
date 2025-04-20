@@ -12,7 +12,7 @@ This project is a PlatformIO port of [kalymos' PsNee](https://github.com/kalymos
 
 PsNee reminded me of the good old days of working on open-source modchips for the Nintendo Wii and Xbox 360. I was surprised it took so long for someone to create a true open-source mod for the PS1, especially considering the abundance of information out there on the copy-protection functions (like nocash's amazing [PSXSPX specs page](https://problemkaputt.de/psx-spx.htm#cdromprotectionmodchips)). Mad respect to kalymos for getting this done, and to all the other contributors who have worked on the project.
 
-Being bored and having an old SCPH-5002 lying around, as well as a stack of RP2040-Zero boards, I thought it useful to pick up where others have left off and port the code to the RP2040. PlatformIO seemed like a good choice for getting this done, as it allows for easy cross-platform development and supports a wide range of microcontrollers. I'm tossing up whether or not to abandon the Arduino libraries and go with the native RP2040 libraries, but for now, I'm sticking with them for ease of use and cross-compatibility. 
+Being bored and having an old SCPH-7502 lying around, as well as a stack of RP2040-Zero boards, I thought it useful to pick up where others have left off and port the code to the RP2040. PlatformIO seemed like a good choice for getting this done, as it allows for easy cross-platform development and supports a wide range of microcontrollers. I'm tossing up whether or not to abandon the Arduino libraries and go with the native RP2040 libraries, but for now, I'm sticking with them for ease of use and cross-compatibility. 
 
 I'll probably end up doing a native RP2040 port at some point, but for now, this is a good start.
 
