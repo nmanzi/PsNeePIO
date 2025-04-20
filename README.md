@@ -8,7 +8,7 @@ PsNeePIO is an open-source implementation of the PS1 modchip that works across m
 
 This project is a PlatformIO port of [kalymos' PsNee](https://github.com/kalymos/PsNee), with additions and modifications to support additional microcontrollers.
 
-### My Thoughts
+### Rationale
 
 PsNee reminded me of the good old days of working on open-source modchips for the Nintendo Wii and Xbox 360. I was surprised it took so long for someone to create a true open-source mod for the PS1, especially considering the abundance of information out there on the copy-protection functions (like nocash's amazing [PSXSPX specs page](https://problemkaputt.de/psx-spx.htm#cdromprotectionmodchips)). Mad respect to kalymos for getting this done, and to all the other contributors who have worked on the project.
 
@@ -45,62 +45,28 @@ This project supports the following microcontrollers:
 - Raspberry Pi Pico (RP2040)
   - Waveshare RP2040-Zero
 
-## Pinout Diagrams
+### Pinout and installation instructions
 
 Check the [Project Wiki](https://github.com/nmanzi/PsNeePIO/wiki) for pinout diagrams for each supported microcontroller and PlayStation model. The diagrams include wiring instructions for the modchip installation.
 
-## Installation & Usage
+## Building
 
 1. Clone this repository
 2. Configure your console model and chip type in `src/main.cpp`
 3. Build and upload using PlatformIO
-4. Install the modchip in your PlayStation console according to the pinout diagrams
-
-## Configuration
-
-Edit the following sections in `src/main.cpp`:
-
-1. Select your console model by uncommenting the appropriate `#define` statement
-2. Select your microcontroller by uncommenting the appropriate `#define` statement
-3. Optionally enable LED indicators or hardware patching switches
-
-## Building
-
-This project uses PlatformIO for building. Ensure you have PlatformIO installed and configured.
+4. Install the modchip in your PlayStation console according to the [pinout diagrams](https://github.com/nmanzi/PsNeePIO/wiki)
 
 ### Build Commands
 
+Check the `platformio.ini` file for the available environments. You can build for your desired microcontroller by running the following commands in the terminal as an example:
+
 ```bash
-# Build for Arduino Nano (ATmega328)
-pio run -e nanoatmega328
-
-# Build for Arduino Micro (ATmega32U4)
-pio run -e micro
-
-# Build for ATtiny85
-pio run -e attiny85
-
 # Build for Raspberry Pi Pico (RP2040)
 pio run -e rp2040
-```
 
-### Upload Commands
-
-```bash
-# Upload to Arduino Nano
-pio run -e nanoatmega328 --target upload
-
-# Upload to Arduino Micro
-pio run -e micro --target upload
-
-# Upload to ATtiny85
-pio run -e attiny85 --target upload
-
-# Upload to Raspberry Pi Pico
+# Upload to Raspberry Pi Pico (RP2040)
 pio run -e rp2040 --target upload
 ```
-
-Refer to the `platformio.ini` file for additional environment configurations and options.
 
 ## License
 
