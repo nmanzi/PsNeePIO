@@ -1,12 +1,20 @@
 # PsNeePIO
 
-A PlayStation modchip implementation using PlatformIO, designed to bypass region locking on PlayStation 1 consoles.
+A PlayStation modchip implementation using PlatformIO and the Arduino libraries.
 
 ## Overview
 
 PsNeePIO is an open-source implementation of the PS1 modchip that works across multiple PlayStation models and supports various microcontrollers. It injects SCEX data to bypass the region protection, allowing you to play games from any region on your console.
 
 This project is a PlatformIO port of [kalymos' PsNee](https://github.com/kalymos/PsNee), with additions and modifications to support additional microcontrollers.
+
+### My Thoughts
+
+PsNee reminded me of the good old days of working on open-source modchips for the Nintendo Wii and Xbox 360. I was surprised it took so long for someone to create a true open-source mod for the PS1, especially considering the abundance of information out there on the copy-protection functions (like nocash's amazing [PSXSPX specs page](https://problemkaputt.de/psx-spx.htm#cdromprotectionmodchips)). Mad respect to kalymos for getting this done, and to all the other contributors who have worked on the project.
+
+Being bored and having an old SCPH-5002 lying around, as well as a stack of RP2040-Zero boards, I thought it useful to pick up where others have left off and port the code to the RP2040. PlatformIO seemed like a good choice for getting this done, as it allows for easy cross-platform development and supports a wide range of microcontrollers. I'm tossing up whether or not to abandon the Arduino libraries and go with the native RP2040 libraries, but for now, I'm sticking with them for ease of use and cross-compatibility. 
+
+I'll probably end up doing a native RP2040 port at some point, but for now, this is a good start.
 
 ## Features
 
@@ -20,68 +28,26 @@ This project is a PlatformIO port of [kalymos' PsNee](https://github.com/kalymos
 ## Project Goals
 
 - [x] Port the original PsNee to PlatformIO for easier development and cross-platform support
-- [x] Support for Arduino-based microcontrollers (ATmega328/168, ATmega32U4/16U4)
-- [x] Support for ATtiny microcontrollers (ATtiny85/45/25)
 - [x] Complete the port to RP2040 (Raspberry Pi Pico)
+- [ ] Test on various PlayStation models (please feel free to contribute your results)
 - [ ] Improve documentation and add wiring diagrams
 - [ ] Add support for more microcontrollers
 
 ## Supported PlayStation Models
 
-- SCPH-xxxx (Generic support for NTSC-U/C, PAL FAT models)
-- SCPH-xxx1, SCPH-xxx2, SCPH-103 (No BIOS patching needed)
-- SCPH-102, SCPH-100, SCPH-7000-9000
-- SCPH-5500, SCPH-3500-5000, SCPH-3000, SCPH-1000 (All with BIOS patching)
+See the [Project Wiki](https://github.com/nmanzi/PsNeePIO/wiki) for a list of supported PlayStation models, requirements for BIOS patching, testing results against each microcontroller, and any additional notes.
 
-## Hardware Requirements
-
-### Microcontroller Options
+## Supported Microcontrollers
+This project supports the following microcontrollers:
 - Arduino Nano & Pro Mini (ATmega328)
 - Arduino Micro (ATmega32U4)
 - ATtiny85/45/25
 - Raspberry Pi Pico (RP2040)
   - Waveshare RP2040-Zero
 
-### Recommended Fuse Settings
-- ATmega - H: DF, L: EE, E: FD
-- ATtiny - H: DF, L: E2, E: FD
+## Pinout Diagrams
 
-### Pinout for Arduino
-- VCC-3.5v
-- PinGND-GND
-- D2-BIOS AX (Only for BIOS patch)
-- D3-BIOS AY (Only for BIOS ver. 1.0j-1.1j)
-- D4-BIOS DX (Only for BIOS patch)
-- D5-Switch* (Optional for BIOS patch)
-- D6-SQCK
-- D7-SUBQ
-- D8-DATA
-- D9-GATE_WFCK
-- RST-RESET* (Only for JAP_FAT)
-
-### Pinout for ATtiny
-- Pin1-RESET
-- Pin2-LED
-- Pin3-WFCK
-- Pin4-GND
-- Pin5-SQCK (MOSI)
-- Pin6-SUBQ (MISO)
-- Pin7-DATA (SCK)
-- Pin8-VCC
-
-### Pinout for RP2040-Zero Board
-- GPIO2 - DATA
-- GPIO3 - WFCK
-- GPIO4 - SQCK
-- GPIO5 - SUBQ
-- 3.3V - VCC
-- GND - GND
-
-For BIOS patching (only needed for certain models):
-- GPIO6 - BIOS AX
-- GPIO7 - BIOS AY (Only for BIOS ver. 1.0j-1.1j)
-- GPIO8 - BIOS DX
-- GPIO9 - Switch* (Optional for disabling BIOS patch)
+Check the [Project Wiki](https://github.com/nmanzi/PsNeePIO/wiki) for pinout diagrams for each supported microcontroller and PlayStation model. The diagrams include wiring instructions for the modchip installation.
 
 ## Installation & Usage
 
@@ -100,18 +66,41 @@ Edit the following sections in `src/main.cpp`:
 
 ## Building
 
-This project uses PlatformIO for building. Make sure you have PlatformIO installed.
+This project uses PlatformIO for building. Ensure you have PlatformIO installed and configured.
+
+### Build Commands
 
 ```bash
-# Build for Arduino Pro Mini 8MHz
-pio run -e pro8MHzatmega328
+# Build for Arduino Nano (ATmega328)
+pio run -e nanoatmega328
 
-# Build for Raspberry Pi Pico
+# Build for Arduino Micro (ATmega32U4)
+pio run -e micro
+
+# Build for ATtiny85
+pio run -e attiny85
+
+# Build for Raspberry Pi Pico (RP2040)
 pio run -e rp2040
+```
+
+### Upload Commands
+
+```bash
+# Upload to Arduino Nano
+pio run -e nanoatmega328 --target upload
+
+# Upload to Arduino Micro
+pio run -e micro --target upload
+
+# Upload to ATtiny85
+pio run -e attiny85 --target upload
 
 # Upload to Raspberry Pi Pico
 pio run -e rp2040 --target upload
 ```
+
+Refer to the `platformio.ini` file for additional environment configurations and options.
 
 ## License
 
