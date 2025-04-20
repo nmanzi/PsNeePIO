@@ -37,189 +37,205 @@ void ay_interrupt_handler()
 }
 
 // External interrupts for RP2040
-void ax_isr() {
-  impulse++;                         
-  if (impulse == TRIGGER) {           // If impulse reaches the value defined by TRIGGER, the following actions are performed:
-    HOLD;                            
-    #ifdef HIGH_PATCH                
-     PIN_DX_SET;                     
-    #endif
-    PIN_DX_OUTPUT;                   
-    PATCHING;                       
-    #ifdef HIGH_PATCH
-     PIN_DX_CLEAR;                     
-    #endif
-    PIN_DX_INPUT;                      
-    detachInterrupt(digitalPinToInterrupt(PIN_AX));          
+void ax_isr()
+{
+  impulse++;
+  if (impulse == TRIGGER)
+  { // If impulse reaches the value defined by TRIGGER, the following actions are performed:
+    HOLD;
+#ifdef HIGH_PATCH
+    PIN_DX_SET;
+#endif
+    PIN_DX_OUTPUT;
+    PATCHING;
+#ifdef HIGH_PATCH
+    PIN_DX_CLEAR;
+#endif
+    PIN_DX_INPUT;
+    detachInterrupt(digitalPinToInterrupt(PIN_AX));
 
-    impulse = 0;                    
-    patch = 1;                       // patch is set to 1, indicating that the first patch is completed.
+    impulse = 0;
+    patch = 1; // patch is set to 1, indicating that the first patch is completed.
   }
 }
 
-#ifdef HIGH_PATCH 
-void ay_isr() {
-  impulse++;                         
-  if (impulse == TRIGGER2)           // If impulse reaches the value defined by TRIGGER2, the following actions are performed:
+#ifdef HIGH_PATCH
+void ay_isr()
+{
+  impulse++;
+  if (impulse == TRIGGER2) // If impulse reaches the value defined by TRIGGER2, the following actions are performed:
   {
-    HOLD2;                           
-    PIN_DX_OUTPUT;                  
-    PATCHING2;                      
-    PIN_DX_INPUT;                        
-    detachInterrupt(digitalPinToInterrupt(PIN_AY));           
+    HOLD2;
+    PIN_DX_OUTPUT;
+    PATCHING2;
+    PIN_DX_INPUT;
+    detachInterrupt(digitalPinToInterrupt(PIN_AY));
 
-    patch = 2;                       // patch is set to 2, indicating that the second patch is completed.
+    patch = 2; // patch is set to 2, indicating that the second patch is completed.
   }
 }
 #endif
 
 // In RP2040, we'll assign these functions to the function pointers
-void enable_ax_interrupt(PinStatus mode) {
+void enable_ax_interrupt(PinStatus mode)
+{
   ax_isr_ptr = ax_isr;
   attachInterrupt(digitalPinToInterrupt(PIN_AX), ax_interrupt_handler, mode);
 }
 
 #ifdef HIGH_PATCH
-void enable_ay_interrupt(PinStatus mode) {
+void enable_ay_interrupt(PinStatus mode)
+{
   ay_isr_ptr = ay_isr;
   attachInterrupt(digitalPinToInterrupt(PIN_AY), ay_interrupt_handler, mode);
 }
 #endif
 
-#else  // For non-RP2040 microcontrollers
+#else // For non-RP2040 microcontrollers
 
-ISR(PIN_AX_INTERRUPT_VECTOR) {
-	impulse++;                         
-	if (impulse == TRIGGER){           // If impulse reaches the value defined by TRIGGER, the following actions are performed:
-		HOLD;                            
-		#ifdef HIGH_PATCH                
-		 PIN_DX_SET;                     
-		#endif
-		PIN_DX_OUTPUT;                   
-		PATCHING;                       
-		#ifdef HIGH_PATCH
-		 PIN_DX_CLEAR;                     
-		#endif
-		PIN_DX_INPUT;                      
-		PIN_AX_INTERRUPT_DISABLE;          
+ISR(PIN_AX_INTERRUPT_VECTOR)
+{
+  impulse++;
+  if (impulse == TRIGGER)
+  { // If impulse reaches the value defined by TRIGGER, the following actions are performed:
+    HOLD;
+#ifdef HIGH_PATCH
+    PIN_DX_SET;
+#endif
+    PIN_DX_OUTPUT;
+    PATCHING;
+#ifdef HIGH_PATCH
+    PIN_DX_CLEAR;
+#endif
+    PIN_DX_INPUT;
+    PIN_AX_INTERRUPT_DISABLE;
 
-		impulse = 0;                    
-		patch = 1;                       // patch is set to 1, indicating that the first patch is completed.
-	}
+    impulse = 0;
+    patch = 1; // patch is set to 1, indicating that the first patch is completed.
+  }
 }
 
+#ifdef HIGH_PATCH
 
-#ifdef HIGH_PATCH 
+ISR(PIN_AY_INTERRUPT_VECTOR)
+{
 
-ISR(PIN_AY_INTERRUPT_VECTOR){
+  impulse++;
+  if (impulse == TRIGGER2) // If impulse reaches the value defined by TRIGGER2, the following actions are performed:
+  {
+    HOLD2;
+    PIN_DX_OUTPUT;
+    PATCHING2;
+    PIN_DX_INPUT;
+    PIN_AY_INTERRUPT_DISABLE;
 
-	impulse++;                         
-	if (impulse == TRIGGER2)           // If impulse reaches the value defined by TRIGGER2, the following actions are performed:
-	{
-		HOLD2;                           
-		PIN_DX_OUTPUT;                  
-		PATCHING2;                      
-		PIN_DX_INPUT;                        
-		PIN_AY_INTERRUPT_DISABLE;           
-
-		patch = 2;                       // patch is set to 2, indicating that the second patch is completed.
-	}
+    patch = 2; // patch is set to 2, indicating that the second patch is completed.
+  }
 }
 #endif
 
-#endif  // RP2040
+#endif // RP2040
 
-void Bios_Patching(){
+void Bios_Patching()
+{
 
 #ifdef rp2040zero
-  // For RP2040, configure the interrupts differently
-  #ifdef LOW_TRIGGER                
-    enable_ax_interrupt(FALLING);          
-  #else
-    enable_ax_interrupt(RISING);            
-  #endif
+// For RP2040, configure the interrupts differently
+#ifdef LOW_TRIGGER
+  enable_ax_interrupt(FALLING);
+#else
+  enable_ax_interrupt(RISING);
+#endif
 
-  if (PIN_AX_READ != 0)                 // If the AX pin is high
+  if (PIN_AX_READ != 0) // If the AX pin is high
   {
-    while (PIN_AX_READ != 0);           // Wait for it to go low
-    while (PIN_AX_READ == 0);           // Then wait for it to go high again.
+    while (PIN_AX_READ != 0)
+      ; // Wait for it to go low
+    while (PIN_AX_READ == 0)
+      ; // Then wait for it to go high again.
   }
-  else                                  // If the AX pin is low
+  else // If the AX pin is low
   {
-    while (PIN_AX_READ == 0);           // Wait for it to go high.
+    while (PIN_AX_READ == 0)
+      ; // Wait for it to go high.
   }
-  
-  Timer_Start();                    
-  while (microsec < CHECKPOINT) {
+
+  Timer_Start();
+  while (microsec < CHECKPOINT)
+  {
     // Update microsec value for RP2040
     update_timer_vars();
-  }  
-  Timer_Stop();                     
-  
-  while (patch != 1);                   // Wait for the first stage of the patch to complete:
+  }
+  Timer_Stop();
 
-  #ifdef HIGH_PATCH 
-    #ifdef LOW_TRIGGER2
-      enable_ay_interrupt(FALLING);          
-    #else
-      enable_ay_interrupt(RISING);           
-    #endif
-   
-    while (PIN_AY_READ != 0);             // Wait for it to go low
-    Timer_Start();                   
-    while (microsec < CHECKPOINT2) {
-      // Update microsec value for RP2040
-      update_timer_vars();
-    }
-    Timer_Stop();                       
-    
-    while (patch != 2);                 // Wait for the second stage of the patch to complete:
-  #endif
+  while (patch != 1)
+    ; // Wait for the first stage of the patch to complete:
+
+#ifdef HIGH_PATCH
+  enable_ay_interrupt(FALLING);
+
+  while (PIN_AY_READ != 0)
+    ; // Wait for it to go low
+  Timer_Start();
+  while (microsec < CHECKPOINT2)
+  {
+    // Update microsec value for RP2040
+    update_timer_vars();
+  }
+  Timer_Stop();
+
+  while (patch != 2)
+    ; // Wait for the second stage of the patch to complete:
+#endif
 
 #else
-  // Non-RP2040 implementation
-  // If LOW_TRIGGER is defined
-	#ifdef LOW_TRIGGER                
-	 PIN_AX_INTERRUPT_FALLING;           
-	 #else
-	 PIN_AX_INTERRUPT_RISING;             
-	#endif
+// Non-RP2040 implementation
+// If LOW_TRIGGER is defined
+#ifdef LOW_TRIGGER
+  PIN_AX_INTERRUPT_FALLING;
+#else
+  PIN_AX_INTERRUPT_RISING;
+#endif
 
-	if (PIN_AX_READ != 0)                 // If the AX pin is high
-	{
-		while (PIN_AX_READ != 0);           // Wait for it to go low
-		while (PIN_AX_READ == 0);           // Then wait for it to go high again.
-	}
-	else                                  // If the AX pin is low
-	{
-		while (PIN_AX_READ == 0);           // Wait for it to go high.
-	}
-	
-	Timer_Start();                    
-	while (microsec < CHECKPOINT);        // Wait until the number of microseconds elapsed reaches a value defined by CHECKPOINT.
-	Timer_Stop();                     
-	PIN_AX_INTERRUPT_ENABLE;              
-	
-	while (patch != 1);                   // Wait for the first stage of the patch to complete:
+  if (PIN_AX_READ != 0) // If the AX pin is high
+  {
+    while (PIN_AX_READ != 0)
+      ; // Wait for it to go low
+    while (PIN_AX_READ == 0)
+      ; // Then wait for it to go high again.
+  }
+  else // If the AX pin is low
+  {
+    while (PIN_AX_READ == 0)
+      ; // Wait for it to go high.
+  }
 
-	#ifdef HIGH_PATCH 
+  Timer_Start();
+  while (microsec < CHECKPOINT)
+    ; // Wait until the number of microseconds elapsed reaches a value defined by CHECKPOINT.
+  Timer_Stop();
+  PIN_AX_INTERRUPT_ENABLE;
 
-	 #ifdef HIGH_PATCH              
-	  PIN_AY_INTERRUPT_FALLING;          
-	  #else
-	  PIN_AY_INTERRUPT_RISING;           
-	 #endif
-   
-	  while (PIN_AY_READ != 0);             // Wait for it to go low
-	  Timer_Start();                   
-	  while (microsec < CHECKPOINT2);     // Wait until the number of microseconds elapsed reaches a value defined by CHECKPOINT2.
-	  Timer_Stop();                       
-	  PIN_AY_INTERRUPT_ENABLE;            
+  while (patch != 1)
+    ; // Wait for the first stage of the patch to complete:
 
-	  while (patch != 2);                 // Wait for the second stage of the patch to complete:
+#ifdef HIGH_PATCH
 
-	#endif
-#endif  // RP2040
+  PIN_AY_INTERRUPT_FALLING;
+
+  while (PIN_AY_READ != 0)
+    ; // Wait for it to go low
+  Timer_Start();
+  while (microsec < CHECKPOINT2)
+    ; // Wait until the number of microseconds elapsed reaches a value defined by CHECKPOINT2.
+  Timer_Stop();
+  PIN_AY_INTERRUPT_ENABLE;
+
+  while (patch != 2)
+    ; // Wait for the second stage of the patch to complete:
+
+#endif
+#endif // RP2040
 }
 
 #endif
