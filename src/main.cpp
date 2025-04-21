@@ -369,13 +369,15 @@ void Init()
   }
 #endif
 
-#if defined(LED_RUN) && !defined(rp2040zero)
-  PIN_LED_OUTPUT;
-#else
-  pixels.begin(); // Initialize the NeoPixel
-  pixels.setBrightness(50); // Set brightness to 50 (0-255)
-  pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
-  pixels.show(); // Update the NeoPixel to show the off state
+#if defined(LED_RUN)
+  #if !defined(rp2040zero)
+    PIN_LED_OUTPUT;
+  #else
+    pixels.begin(); // Initialize the NeoPixel
+    pixels.setBrightness(50); // Set brightness to 50 (0-255)
+    pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
+    pixels.show(); // Update the NeoPixel to show the off state
+  #endif
 #endif
 
   GLOBAL_INTERRUPT_ENABLE;
@@ -398,11 +400,13 @@ int main()
 
 #if defined(BIOS_PATCH)
 
-#if defined(LED_RUN) && !defined(rp2040zero)
-  PIN_LED_ON;
-#else
-  pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // Set the NeoPixel to green
-  pixels.show(); // Update the NeoPixel to show the red color
+#if defined(LED_RUN)
+  #if !defined(rp2040zero)
+    PIN_LED_ON;
+  #else
+    pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // Set the NeoPixel to green
+    pixels.show();
+  #endif
 #endif
 
   // Check if the switch is latched
@@ -412,11 +416,13 @@ int main()
     Bios_Patching();
   }
 
-#if defined(LED_RUN) && !defined(rp2040zero)
-  PIN_LED_OFF;
-#else
-  pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
-  pixels.show(); // Update the NeoPixel to show the off state
+#if defined(LED_RUN)
+  #if !defined(rp2040zero)
+    PIN_LED_OFF;
+  #else
+    pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
+    pixels.show();
+  #endif
 #endif
 
 #endif
@@ -547,11 +553,13 @@ int main()
       // Executes the region code patch injection sequence.
       //************************************************************************
 
-#if defined(LED_RUN) && !defined(rp2040zero)
-      PIN_LED_ON;
-#else
-      pixels.setPixelColor(0, pixels.Color(0, 0, 255)); // Set the NeoPixel to blue
-      pixels.show(); // Update the NeoPixel to show the red color
+#if defined(LED_RUN)
+  #if !defined(rp2040zero)
+    PIN_LED_ON;
+  #else
+    pixels.setPixelColor(0, pixels.Color(0, 0, 255)); // Set the NeoPixel to blue
+    pixels.show();
+  #endif
 #endif
 
       PIN_DATA_OUTPUT;
@@ -578,11 +586,13 @@ int main()
 
       PIN_DATA_INPUT;
 
-#if defined(LED_RUN) && !defined(rp2040zero)
-      PIN_LED_OFF;
-#else
-      pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to black
-      pixels.show(); // Update the NeoPixel to show the red color
+#if defined(LED_RUN)
+  #if !defined(rp2040zero)
+    PIN_LED_OFF;
+  #else
+    pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
+    pixels.show();
+  #endif
 #endif
     }
   }
