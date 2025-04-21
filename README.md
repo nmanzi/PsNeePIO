@@ -28,8 +28,9 @@ I'll probably end up doing a native RP2040 port at some point, but for now, this
 ## Project Goals
 
 - [x] Port the original PsNee to PlatformIO for easier development and cross-platform support
-- [x] Complete the port to RP2040 (Raspberry Pi Pico)
-- [ ] Test on various PlayStation models (please feel free to contribute your results)
+- [x] Complete the port to RP2040
+- [ ] Implement UART for injection on RP2040 (thanks [Skitchin](https://github.com/johnbaumann/)!)
+- [ ] Test on various PlayStation models (please feel free to contribute your results, especially if you have a hardware model that requires BIOS patching!)
 - [ ] Improve documentation and add wiring diagrams
 - [ ] Add support for more microcontrollers
 
