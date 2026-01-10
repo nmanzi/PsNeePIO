@@ -59,9 +59,9 @@ For capable microcontrollers like the RP2040, PsNeePIO supports an optional UART
 
 ### How It Works
 
-Instead of manually toggling GPIO pins at precise intervals, UART mode leverages the hardware UART peripheral configured at 250 baud. The SCEX region codes are transmitted as ASCII strings ("SCEE", "SCEA", "SCEI"), and when combined with inverted output, the resulting waveform matches the SCEX pattern that PlayStation consoles expect.
+Instead of manually toggling GPIO pins at precise intervals, UART mode leverages the hardware UART peripheral configured at 250 baud. The SCEX region codes are transmitted as ASCII strings ("SCEE", "SCEA", "SCEI"), and the RP2040's built-in TX inversion feature automatically inverts the output to match the SCEX pattern that PlayStation consoles expect.
 
-The key insight is that the ASCII representation of these region codes, when transmitted via UART with specific timing and polarity, produces the correct signal characteristics for PlayStation's copy protection system.
+The key insight is that the ASCII representation of these region codes, when transmitted via UART with inverted polarity, produces the correct signal characteristics for PlayStation's copy protection system.
 
 ### Enabling UART Mode
 
@@ -75,16 +75,15 @@ UART injection is enabled by default for the RP2040. To disable it and use the t
 
 ### Hardware Notes
 
-- The UART TX pin (GPIO 2 by default) should be connected to the DATA line through an inverter
-- **Important:** The UART output must be inverted for proper operation. This can be achieved with:
-  - A simple transistor inverter circuit (e.g., NPN transistor with base resistor) between the UART TX pin and the DATA line, OR
-  - A logic inverter IC (e.g., 74HC04) if you prefer
-- Wiring: UART TX (GPIO 2) -> Inverter -> PlayStation DATA line
-- The inversion is necessary because UART idle state is HIGH, but the PlayStation expects an inverted signal
+- The UART TX pin (GPIO 2 by default) connects **directly** to the PlayStation DATA line
+- **No external inverter needed!** The RP2040 UART peripheral has built-in TX inversion capability
+- The hardware automatically inverts the TX output for proper SCEX signaling
+- Wiring: UART TX (GPIO 2) → PlayStation DATA line (direct connection)
+- Much simpler hardware setup compared to bit-banging or external inverter approaches
 
 ### Note on Implementation
 
-This UART-based approach is based on community findings that demonstrated ASCII strings transmitted at 250 baud with inverted polarity successfully substitute for the complex bit-banging patterns. The UART framing combined with the specific ASCII codes and signal inversion produces the timing and waveform characteristics required by the PlayStation's SCEX authentication system.
+This UART-based approach is based on community findings that demonstrated ASCII strings transmitted at 250 baud with inverted polarity successfully substitute for the complex bit-banging patterns. The UART framing combined with the specific ASCII codes and hardware signal inversion produces the timing and waveform characteristics required by the PlayStation's SCEX authentication system.
 
 ## Building
 

@@ -764,6 +764,11 @@
 #include <stdbool.h>
 #include <Adafruit_NeoPixel.h>
 
+// Include hardware UART headers for direct register access (TX inversion)
+#ifdef USE_UART_INJECTION
+#include "hardware/uart.h"
+#endif
+
 // Timer related definitions
 #define TIMER_TCNT_CLEAR            // No direct timer count register on RP2040 via Arduino
 #define SET_OCROA_DIV               // Handled in setup code
