@@ -95,6 +95,9 @@
 #ifdef rp2040zero
 #define USE_UART_INJECTION  // Comment this out to use the traditional bit-banging method
 #endif
+// Note: To enable UART injection for other RP2040 boards, define rp2040zero
+// in your platformio.ini build_flags, or change the #ifdef above to check for
+// your board's specific define (e.g., ARDUINO_RASPBERRY_PI_PICO)
 
 //------------------------------------------------------------------------------------------------
 //                         pointer and variable section
@@ -637,8 +640,11 @@ int main()
   #endif
 #endif
 
+#ifndef USE_UART_INJECTION
+      // In bit-banging mode, prepare the DATA pin
       PIN_DATA_OUTPUT;
       PIN_DATA_CLEAR;
+#endif
 
       if (!wfck_mode) // If wfck_mode is false (PU-7 .. PU-20 mode)
       {
@@ -659,7 +665,10 @@ int main()
         PIN_WFCK_INPUT;
       }
 
+#ifndef USE_UART_INJECTION
+      // In bit-banging mode, reset the DATA pin
       PIN_DATA_INPUT;
+#endif
 
 #if defined(LED_RUN)
   #if !defined(rp2040zero)
