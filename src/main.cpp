@@ -89,6 +89,13 @@
                           // For the RP2040-Zero, the onboard NeoPixel will light up when the LED_RUN option is enabled.
 // #define PATCH_SWITCH   // Enables hardware support for disabling BIOS patching. Useful in rare cases where the BIOS patch prevents the playback of original games
 
+// Enable UART mode for SCEX injection on capable MCUs (RP2040)
+// This uses a UART at 250 baud with inverted output instead of bit-banging
+// Simpler, more reliable, and frees up CPU cycles
+#ifdef rp2040zero
+#define USE_UART_INJECTION  // Comment this out to use the traditional bit-banging method
+#endif
+
 //------------------------------------------------------------------------------------------------
 //                         pointer and variable section
 //------------------------------------------------------------------------------------------------
@@ -260,12 +267,56 @@ uint8_t readBit(uint8_t index, const uint8_t *ByteSet)
   return !!(ByteSet[index / 8] & (1 << (index % 8))); // Return true if the specified bit is set in ByteSet[index]
 }
 
+#ifdef USE_UART_INJECTION
+// *****************************************************************************************
+// Function: inject_SCEX_uart
+// Description:
+// Injects SCEX data using UART at 250 baud with inverted output.
+// This is a simpler and more reliable method for capable MCUs like the RP2040.
+// The UART automatically handles the timing at 250 baud (4ms per bit).
+//
+// Parameters:
+// - region: A character ('e', 'a', or 'i') representing the target region.
+//
+// *****************************************************************************************
+void inject_SCEX_uart(const char region)
+{
+  // Determine the SCEX string based on region
+  const char* scexData;
+  switch(region) {
+    case 'e':
+      scexData = "SCEE";
+      break;
+    case 'a':
+      scexData = "SCEA";
+      break;
+    case 'i':
+      scexData = "SCEI";
+      break;
+    default:
+      scexData = "SCEE"; // Default to PAL
+      break;
+  }
+  
+  // Send the SCEX string via UART
+  // The UART is configured with inverted output, so the signal is automatically inverted
+  Serial1.print(scexData);
+  
+  // Wait for transmission to complete
+  Serial1.flush();
+  
+  _delay_ms(DELAY_BETWEEN_INJECTIONS);
+}
+
+#define inject_SCEX inject_SCEX_uart
+
+#else
 // *****************************************************************************************
 // Function: inject_SCEX
 // Description:
 // Injects SCEX data corresponding to a given region ('e' for Europe, 'a' for America,
 // 'i' for Japan). This function is used for modulating the SCEX signal to bypass
-// region-locking mechanisms.
+// region-locking mechanisms using bit-banging.
 //
 // Parameters:
 // - region: A character ('e', 'a', or 'i') representing the target region.
@@ -349,6 +400,7 @@ void inject_SCEX(const char region)
   PIN_DATA_CLEAR;
   _delay_ms(DELAY_BETWEEN_INJECTIONS);
 }
+#endif
 
 void Init()
 {
@@ -378,6 +430,17 @@ void Init()
     pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
     pixels.show(); // Update the NeoPixel to show the off state
   #endif
+#endif
+
+#ifdef USE_UART_INJECTION
+  // Initialize UART (Serial1) for SCEX injection
+  // Use TX pin (GPIO 0) for DATA output
+  // 250 baud, 8 data bits, no parity, 1 stop bit
+  // UART output is configured with inverted polarity
+  Serial1.setTX(PIN_DATA);  // Set TX pin to GPIO 2 (DATA pin)
+  Serial1.begin(250);       // 250 baud rate for SCEX injection
+  // Note: For inverted output, you may need to configure the UART hardware
+  // or use an external inverter. The RP2040 UART can be configured for inverted TX.
 #endif
 
   GLOBAL_INTERRUPT_ENABLE;

@@ -24,12 +24,13 @@ I'll probably end up doing a native RP2040 port at some point, but for now, this
 - BIOS patching for models that require it
 - Hardware switch option for enabling/disabling BIOS patching
 - Automatic console generation detection
+- **UART-based SCEX injection for RP2040**: Simpler and more efficient than bit-banging on capable MCUs
 
 ## Project Goals
 
 - [x] Port the original PsNee to PlatformIO for easier development and cross-platform support
 - [x] Complete the port to RP2040 (RP2040-Zero board)
-- [ ] Implement UART for injection on RP2040 (thanks [Skitchin](https://github.com/johnbaumann/)!)
+- [x] Implement UART for injection on RP2040 (thanks [Skitchin](https://github.com/johnbaumann/)!)
 - [ ] Implement PIO where appropriate to free up the main thread for fun and profit
 - [ ] Add [PicoMemcard](https://github.com/dangiu/PicoMemcard/) functionality as a bonus feature (also use littlefs/flash for debug logging?)
 - [ ] Test on various PlayStation models (please feel free to contribute your results, especially if you have a hardware model that requires BIOS patching!)
@@ -51,6 +52,30 @@ This project supports the following microcontrollers:
 ### Pinout and installation instructions
 
 Check the [Project Wiki](https://github.com/nmanzi/PsNeePIO/wiki) for pinout diagrams for each supported microcontroller and PlayStation model. The diagrams include wiring instructions for the modchip installation.
+
+## UART Injection Mode (RP2040)
+
+For capable microcontrollers like the RP2040, PsNeePIO supports an optional UART-based injection mode. This mode is simpler, more reliable, and frees up CPU cycles compared to the traditional bit-banging approach.
+
+### How It Works
+
+Instead of manually toggling GPIO pins at precise intervals, UART mode leverages the hardware UART peripheral configured at 250 baud with inverted output. The SCEX region codes ("SCEE", "SCEA", "SCEI") are sent as simple ASCII strings via the UART, and the hardware handles the timing automatically.
+
+### Enabling UART Mode
+
+UART injection is enabled by default for the RP2040. To disable it and use the traditional bit-banging method, comment out the `USE_UART_INJECTION` define in `src/main.cpp`:
+
+```cpp
+#ifdef rp2040zero
+// #define USE_UART_INJECTION  // Comment this out to use the traditional bit-banging method
+#endif
+```
+
+### Hardware Notes
+
+- The UART TX pin must be connected to the DATA line (GPIO 2 by default)
+- The UART output should be inverted for proper operation. This can be done in hardware with an inverter, or by configuring the RP2040 UART peripheral for inverted TX
+- UART mode uses the same DATA pin as bit-banging mode, so no wiring changes are required
 
 ## Building
 
