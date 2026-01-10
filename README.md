@@ -59,7 +59,9 @@ For capable microcontrollers like the RP2040, PsNeePIO supports an optional UART
 
 ### How It Works
 
-Instead of manually toggling GPIO pins at precise intervals, UART mode leverages the hardware UART peripheral configured at 250 baud. The SCEX region codes ("SCEE", "SCEA", "SCEI") are sent as simple ASCII strings via the UART, and the hardware handles the timing automatically.
+Instead of manually toggling GPIO pins at precise intervals, UART mode leverages the hardware UART peripheral configured at 250 baud. The SCEX region codes are transmitted as ASCII strings ("SCEE", "SCEA", "SCEI"), and when combined with inverted output, the resulting waveform matches the SCEX pattern that PlayStation consoles expect.
+
+The key insight is that the ASCII representation of these region codes, when transmitted via UART with specific timing and polarity, produces the correct signal characteristics for PlayStation's copy protection system.
 
 ### Enabling UART Mode
 
@@ -73,12 +75,16 @@ UART injection is enabled by default for the RP2040. To disable it and use the t
 
 ### Hardware Notes
 
-- The UART TX pin (GPIO 2 by default) should be connected to the DATA line
+- The UART TX pin (GPIO 2 by default) should be connected to the DATA line through an inverter
 - **Important:** The UART output must be inverted for proper operation. This can be achieved with:
   - A simple transistor inverter circuit (e.g., NPN transistor with base resistor) between the UART TX pin and the DATA line, OR
   - A logic inverter IC (e.g., 74HC04) if you prefer
-- No wiring changes are required compared to bit-banging mode - just add the inverter circuit
+- Wiring: UART TX (GPIO 2) -> Inverter -> PlayStation DATA line
 - The inversion is necessary because UART idle state is HIGH, but the PlayStation expects an inverted signal
+
+### Note on Implementation
+
+This UART-based approach is based on community findings that discovered ASCII strings transmitted at 250 baud with inverted polarity can substitute for the complex bit-banging patterns. While the exact mechanism may seem unconventional, it has been reported to work effectively on RP2040 and similar capable MCUs.
 
 ## Building
 

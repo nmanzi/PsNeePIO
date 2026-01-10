@@ -278,10 +278,17 @@ uint8_t readBit(uint8_t index, const uint8_t *ByteSet)
 // Parameters:
 // - region: A character ('e', 'a', or 'i') representing the target region.
 //
+// How it works:
+// When the ASCII strings "SCEE", "SCEA", or "SCEI" are transmitted via UART at 250 baud
+// with inverted output, the resulting waveform matches the SCEX injection pattern that  
+// the PlayStation expects. The UART framing (start bits, data bits, stop bits) combined
+// with the ASCII encoding and signal inversion creates the correct timing and levels.
 // *****************************************************************************************
 void inject_SCEX_uart(const char region)
 {
   // Determine the SCEX string based on region
+  // These ASCII strings, when transmitted at 250 baud with inverted output,
+  // produce the correct SCEX waveform
   const char* scexData;
   switch(region) {
     case 'e':
@@ -299,7 +306,7 @@ void inject_SCEX_uart(const char region)
   }
   
   // Send the SCEX string via UART
-  // The UART is configured with inverted output, so the signal is automatically inverted
+  // With inverted output (via hardware inverter), this creates the correct SCEX signal
   Serial1.print(scexData);
   
   // Wait for transmission to complete
@@ -439,12 +446,11 @@ void Init()
   Serial1.setTX(PIN_DATA);  // Set TX pin to GPIO 2 (DATA pin)
   Serial1.begin(250);       // 250 baud rate for SCEX injection
   
-  // Note: The UART TX output should be inverted for proper SCEX signaling.
-  // This can be done with:
-  // 1. A simple hardware inverter (transistor or logic gate between UART TX and DATA line), OR
-  // 2. Software configuration of the RP2040 UART peripheral (if supported by your framework)
-  //
-  // For hardware inversion, connect UART TX through a transistor inverter to the DATA line.
+  // Note: The UART TX output must be inverted for proper SCEX signaling.
+  // The inversion is done externally via hardware:
+  // - Use a simple transistor inverter (NPN with base resistor), OR
+  // - Use a logic inverter IC (e.g., 74HC04)
+  // Connect: UART TX -> Inverter -> PlayStation DATA line
 #endif
 
   GLOBAL_INTERRUPT_ENABLE;
