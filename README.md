@@ -53,38 +53,6 @@ This project supports the following microcontrollers:
 
 Check the [Project Wiki](https://github.com/nmanzi/PsNeePIO/wiki) for pinout diagrams for each supported microcontroller and PlayStation model. The diagrams include wiring instructions for the modchip installation.
 
-## UART Injection Mode (RP2040)
-
-For capable microcontrollers like the RP2040, PsNeePIO supports an optional UART-based injection mode. This mode is simpler, more reliable, and frees up CPU cycles compared to the traditional bit-banging approach.
-
-### How It Works
-
-Instead of manually toggling GPIO pins at precise intervals, UART mode leverages the hardware UART peripheral configured at 250 baud. The SCEX region codes are transmitted as ASCII strings ("SCEE", "SCEA", "SCEI"), and the RP2040's built-in TX inversion feature automatically inverts the output to match the SCEX pattern that PlayStation consoles expect.
-
-The key insight is that the ASCII representation of these region codes, when transmitted via UART with inverted polarity, produces the correct signal characteristics for PlayStation's copy protection system.
-
-### Enabling UART Mode
-
-UART injection is enabled by default for the RP2040. To disable it and use the traditional bit-banging method, comment out the `USE_UART_INJECTION` define in `src/main.cpp`:
-
-```cpp
-#ifdef rp2040zero
-// #define USE_UART_INJECTION  // Comment this out to use the traditional bit-banging method
-#endif
-```
-
-### Hardware Notes
-
-- The UART TX pin (GPIO 2 by default) connects **directly** to the PlayStation DATA line
-- **No external inverter needed!** The RP2040 UART peripheral has built-in TX inversion capability
-- The hardware automatically inverts the TX output for proper SCEX signaling
-- Wiring: UART TX (GPIO 2) → PlayStation DATA line (direct connection)
-- Much simpler hardware setup compared to bit-banging or external inverter approaches
-
-### Note on Implementation
-
-This UART-based approach is based on community findings that demonstrated ASCII strings transmitted at 250 baud with inverted polarity successfully substitute for the complex bit-banging patterns. The UART framing combined with the specific ASCII codes and hardware signal inversion produces the timing and waveform characteristics required by the PlayStation's SCEX authentication system.
-
 ## Building
 
 1. Clone this repository
