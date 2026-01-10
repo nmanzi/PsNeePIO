@@ -455,16 +455,11 @@ void Init()
   Serial1.setTX(PIN_DATA);             // Set TX pin to GPIO 2 (DATA pin)
   Serial1.begin(UART_INJECTION_BAUD);  // 250 baud rate (matches DELAY_BETWEEN_BITS timing)
   
-  // Enable TX inversion using RP2040 hardware capability
-  // The RP2040 UART peripheral has native support for TX/RX inversion
-  // Serial1 uses uart1 on RP2040
-  uart_set_format(uart1, 8, 1, UART_PARITY_NONE);  // Ensure format is set
+  // Enable TX inversion using the Arduino-Pico SerialUART method
+  // This is cleaner than direct hardware register manipulation
+  Serial1.setInvertTX(true);           // Invert TX output for correct SCEX polarity
   
-  // Enable TX inversion by setting the TXINV bit in UARTLCR_H register
-  // This inverts the TX output in hardware - no external inverter needed!
-  hw_set_bits(&uart_get_hw(uart1)->lcr_h, 1u << 2);  // Bit 2 = TXINV
-  
-  // Note: With hardware TX inversion enabled, no external inverter is needed.
+  // Note: With TX inversion enabled, no external inverter is needed.
   // Connect UART TX (GPIO 2) directly to the PlayStation DATA line.
   // The hardware inversion provides the correct signal polarity for SCEX injection.
   //
