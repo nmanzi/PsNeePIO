@@ -284,7 +284,7 @@ uint8_t readBit(uint8_t index, const uint8_t *ByteSet)
 // the PlayStation expects. The UART framing (start bits, data bits, stop bits) combined
 // with the ASCII encoding and signal inversion creates the correct timing and levels.
 // *****************************************************************************************
-void inject_SCEX_uart(const char region)
+void inject_SCEX(const char region)
 {
   // Determine the SCEX string based on region
   // These ASCII strings, when transmitted at 250 baud with inverted output,
@@ -314,8 +314,6 @@ void inject_SCEX_uart(const char region)
   
   _delay_ms(DELAY_BETWEEN_INJECTIONS);
 }
-
-#define inject_SCEX inject_SCEX_uart
 
 #else
 // *****************************************************************************************
@@ -451,6 +449,10 @@ void Init()
   // - Use a simple transistor inverter (NPN with base resistor), OR
   // - Use a logic inverter IC (e.g., 74HC04)
   // Connect: UART TX -> Inverter -> PlayStation DATA line
+  //
+  // Important: When using UART mode, the DATA pin is controlled by the UART peripheral,
+  // not by GPIO. Do not attempt to use PIN_DATA_OUTPUT/INPUT/SET/CLEAR macros
+  // when UART mode is enabled.
 #endif
 
   GLOBAL_INTERRUPT_ENABLE;
