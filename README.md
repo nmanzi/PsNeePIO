@@ -84,7 +84,7 @@ UART injection is enabled by default for the RP2040. To disable it and use the t
 
 ### Note on Implementation
 
-This UART-based approach is based on community findings that discovered ASCII strings transmitted at 250 baud with inverted polarity can substitute for the complex bit-banging patterns. While the exact mechanism may seem unconventional, it has been reported to work effectively on RP2040 and similar capable MCUs.
+This UART-based approach is based on community findings that demonstrated ASCII strings transmitted at 250 baud with inverted polarity successfully substitute for the complex bit-banging patterns. The UART framing combined with the specific ASCII codes and signal inversion produces the timing and waveform characteristics required by the PlayStation's SCEX authentication system.
 
 ## Building
 

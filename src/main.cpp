@@ -108,6 +108,9 @@
 #define HYSTERESIS_MAX 17           // The sweet spot is between 11~19. All models have bad behavior below 11, PU-41 can start to have bad behavior beyond 20, for fat models we can go up to 60
                                     // On fat models if your reader is really bad you can increase this value in steps of 5.
 
+// UART injection parameters (for RP2040 UART mode)
+#define UART_INJECTION_BAUD 250     // 250 baud = 4000 microseconds per bit (matches DELAY_BETWEEN_BITS)
+
 // Switches
 volatile bool wfck_mode = 0;        // This variable is used to determine the mode of the wfck pin
 volatile bool Flag_Switch = 0;      // This variable is used to determine the state of the HW switch
@@ -442,10 +445,15 @@ void Init()
 
 #ifdef USE_UART_INJECTION
   // Initialize UART (Serial1) for SCEX injection
+  // Serial1 is available on all RP2040 Arduino boards
+  #ifndef Serial1
+    #error "Serial1 (UART) is required for UART injection mode but is not available on this platform"
+  #endif
+  
   // Use TX pin (GPIO 2) for DATA output  
   // 250 baud, 8 data bits, no parity, 1 stop bit
-  Serial1.setTX(PIN_DATA);  // Set TX pin to GPIO 2 (DATA pin)
-  Serial1.begin(250);       // 250 baud rate for SCEX injection
+  Serial1.setTX(PIN_DATA);             // Set TX pin to GPIO 2 (DATA pin)
+  Serial1.begin(UART_INJECTION_BAUD);  // 250 baud rate (matches DELAY_BETWEEN_BITS timing)
   
   // Note: The UART TX output must be inverted for proper SCEX signaling.
   // The inversion is done externally via hardware:
