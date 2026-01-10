@@ -445,11 +445,6 @@ void Init()
 
 #ifdef USE_UART_INJECTION
   // Initialize UART (Serial1) for SCEX injection
-  // Serial1 is available on all RP2040 Arduino boards
-  #ifndef Serial1
-    #error "Serial1 (UART) is required for UART injection mode but is not available on this platform"
-  #endif
-  
   // Use TX pin (GPIO 2) for DATA output  
   // 250 baud, 8 data bits, no parity, 1 stop bit
   Serial1.setTX(PIN_DATA);             // Set TX pin to GPIO 2 (DATA pin)
