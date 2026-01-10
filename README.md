@@ -24,12 +24,13 @@ I'll probably end up doing a native RP2040 port at some point, but for now, this
 - BIOS patching for models that require it
 - Hardware switch option for enabling/disabling BIOS patching
 - Automatic console generation detection
+- **UART-based SCEX injection for RP2040**: Simpler and more efficient than bit-banging on capable MCUs
 
 ## Project Goals
 
 - [x] Port the original PsNee to PlatformIO for easier development and cross-platform support
 - [x] Complete the port to RP2040 (RP2040-Zero board)
-- [ ] Implement UART for injection on RP2040 (thanks [Skitchin](https://github.com/johnbaumann/)!)
+- [x] Implement UART for injection on RP2040 (thanks [Skitchin](https://github.com/johnbaumann/)!)
 - [ ] Implement PIO where appropriate to free up the main thread for fun and profit
 - [ ] Add [PicoMemcard](https://github.com/dangiu/PicoMemcard/) functionality as a bonus feature (also use littlefs/flash for debug logging?)
 - [ ] Test on various PlayStation models (please feel free to contribute your results, especially if you have a hardware model that requires BIOS patching!)

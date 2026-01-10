@@ -89,6 +89,16 @@
                           // For the RP2040-Zero, the onboard NeoPixel will light up when the LED_RUN option is enabled.
 // #define PATCH_SWITCH   // Enables hardware support for disabling BIOS patching. Useful in rare cases where the BIOS patch prevents the playback of original games
 
+// Enable UART mode for SCEX injection on capable MCUs (RP2040)
+// This uses a UART at 250 baud with inverted output instead of bit-banging
+// Simpler, more reliable, and frees up CPU cycles
+#ifdef rp2040zero
+#define USE_UART_INJECTION  // Comment this out to use the traditional bit-banging method
+#endif
+// Note: To enable UART injection for other RP2040 boards, define rp2040zero
+// in your platformio.ini build_flags, or change the #ifdef above to check for
+// your board's specific define (e.g., ARDUINO_RASPBERRY_PI_PICO)
+
 //------------------------------------------------------------------------------------------------
 //                         pointer and variable section
 //------------------------------------------------------------------------------------------------
@@ -97,6 +107,9 @@
 #define DELAY_BETWEEN_INJECTIONS 90 // The sweet spot is around 80~100. For all observed models, the worst minimum time seen is 72, and it works well up to 250.
 #define HYSTERESIS_MAX 17           // The sweet spot is between 11~19. All models have bad behavior below 11, PU-41 can start to have bad behavior beyond 20, for fat models we can go up to 60
                                     // On fat models if your reader is really bad you can increase this value in steps of 5.
+
+// UART injection parameters (for RP2040 UART mode)
+#define UART_INJECTION_BAUD 250     // 250 baud = 4000 microseconds per bit (matches DELAY_BETWEEN_BITS)
 
 // Switches
 volatile bool wfck_mode = 0;        // This variable is used to determine the mode of the wfck pin
@@ -260,12 +273,61 @@ uint8_t readBit(uint8_t index, const uint8_t *ByteSet)
   return !!(ByteSet[index / 8] & (1 << (index % 8))); // Return true if the specified bit is set in ByteSet[index]
 }
 
+#ifdef USE_UART_INJECTION
+// *****************************************************************************************
+// Function: inject_SCEX_uart
+// Description:
+// Injects SCEX data using UART at 250 baud with inverted output.
+// This is a simpler and more reliable method for capable MCUs like the RP2040.
+// The UART automatically handles the timing at 250 baud (4ms per bit).
+//
+// Parameters:
+// - region: A character ('e', 'a', or 'i') representing the target region.
+//
+// How it works:
+// When the ASCII strings "SCEE", "SCEA", or "SCEI" are transmitted via UART at 250 baud
+// with inverted output, the resulting waveform matches the SCEX injection pattern that  
+// the PlayStation expects. The UART framing (start bits, data bits, stop bits) combined
+// with the ASCII encoding and signal inversion creates the correct timing and levels.
+// *****************************************************************************************
+void inject_SCEX(const char region)
+{
+  // Determine the SCEX string based on region
+  // These ASCII strings, when transmitted at 250 baud with inverted output,
+  // produce the correct SCEX waveform
+  const char* scexData;
+  switch(region) {
+    case 'e':
+      scexData = "SCEE";
+      break;
+    case 'a':
+      scexData = "SCEA";
+      break;
+    case 'i':
+      scexData = "SCEI";
+      break;
+    default:
+      scexData = "SCEE"; // Default to PAL
+      break;
+  }
+  
+  // Send the SCEX string via UART
+  // With inverted output (via hardware inverter), this creates the correct SCEX signal
+  Serial1.print(scexData);
+  
+  // Wait for transmission to complete
+  Serial1.flush();
+  
+  _delay_ms(DELAY_BETWEEN_INJECTIONS);
+}
+
+#else
 // *****************************************************************************************
 // Function: inject_SCEX
 // Description:
 // Injects SCEX data corresponding to a given region ('e' for Europe, 'a' for America,
 // 'i' for Japan). This function is used for modulating the SCEX signal to bypass
-// region-locking mechanisms.
+// region-locking mechanisms using bit-banging.
 //
 // Parameters:
 // - region: A character ('e', 'a', or 'i') representing the target region.
@@ -349,6 +411,7 @@ void inject_SCEX(const char region)
   PIN_DATA_CLEAR;
   _delay_ms(DELAY_BETWEEN_INJECTIONS);
 }
+#endif
 
 void Init()
 {
@@ -378,6 +441,26 @@ void Init()
     pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Set the NeoPixel to off
     pixels.show(); // Update the NeoPixel to show the off state
   #endif
+#endif
+
+#ifdef USE_UART_INJECTION
+  // Initialize UART (Serial1) for SCEX injection
+  // Use TX pin (GPIO 2) for DATA output  
+  // 250 baud, 8 data bits, no parity, 1 stop bit
+  Serial1.setTX(PIN_DATA);             // Set TX pin to GPIO 2 (DATA pin)
+  Serial1.begin(UART_INJECTION_BAUD);  // 250 baud rate (matches DELAY_BETWEEN_BITS timing)
+  
+  // Enable TX inversion using the Arduino-Pico SerialUART method
+  // This is cleaner than direct hardware register manipulation
+  Serial1.setInvertTX(true);           // Invert TX output for correct SCEX polarity
+  
+  // Note: With TX inversion enabled, no external inverter is needed.
+  // Connect UART TX (GPIO 2) directly to the PlayStation DATA line.
+  // The hardware inversion provides the correct signal polarity for SCEX injection.
+  //
+  // Important: When using UART mode, the DATA pin is controlled by the UART peripheral,
+  // not by GPIO. Do not attempt to use PIN_DATA_OUTPUT/INPUT/SET/CLEAR macros
+  // when UART mode is enabled.
 #endif
 
   GLOBAL_INTERRUPT_ENABLE;
@@ -562,8 +645,11 @@ int main()
   #endif
 #endif
 
+#ifndef USE_UART_INJECTION
+      // In bit-banging mode, prepare the DATA pin
       PIN_DATA_OUTPUT;
       PIN_DATA_CLEAR;
+#endif
 
       if (!wfck_mode) // If wfck_mode is false (PU-7 .. PU-20 mode)
       {
@@ -584,7 +670,10 @@ int main()
         PIN_WFCK_INPUT;
       }
 
+#ifndef USE_UART_INJECTION
+      // In bit-banging mode, reset the DATA pin
       PIN_DATA_INPUT;
+#endif
 
 #if defined(LED_RUN)
   #if !defined(rp2040zero)
