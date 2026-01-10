@@ -434,13 +434,17 @@ void Init()
 
 #ifdef USE_UART_INJECTION
   // Initialize UART (Serial1) for SCEX injection
-  // Use TX pin (GPIO 0) for DATA output
+  // Use TX pin (GPIO 2) for DATA output  
   // 250 baud, 8 data bits, no parity, 1 stop bit
-  // UART output is configured with inverted polarity
   Serial1.setTX(PIN_DATA);  // Set TX pin to GPIO 2 (DATA pin)
   Serial1.begin(250);       // 250 baud rate for SCEX injection
-  // Note: For inverted output, you may need to configure the UART hardware
-  // or use an external inverter. The RP2040 UART can be configured for inverted TX.
+  
+  // Note: The UART TX output should be inverted for proper SCEX signaling.
+  // This can be done with:
+  // 1. A simple hardware inverter (transistor or logic gate between UART TX and DATA line), OR
+  // 2. Software configuration of the RP2040 UART peripheral (if supported by your framework)
+  //
+  // For hardware inversion, connect UART TX through a transistor inverter to the DATA line.
 #endif
 
   GLOBAL_INTERRUPT_ENABLE;

@@ -59,7 +59,7 @@ For capable microcontrollers like the RP2040, PsNeePIO supports an optional UART
 
 ### How It Works
 
-Instead of manually toggling GPIO pins at precise intervals, UART mode leverages the hardware UART peripheral configured at 250 baud with inverted output. The SCEX region codes ("SCEE", "SCEA", "SCEI") are sent as simple ASCII strings via the UART, and the hardware handles the timing automatically.
+Instead of manually toggling GPIO pins at precise intervals, UART mode leverages the hardware UART peripheral configured at 250 baud. The SCEX region codes ("SCEE", "SCEA", "SCEI") are sent as simple ASCII strings via the UART, and the hardware handles the timing automatically.
 
 ### Enabling UART Mode
 
@@ -73,9 +73,12 @@ UART injection is enabled by default for the RP2040. To disable it and use the t
 
 ### Hardware Notes
 
-- The UART TX pin must be connected to the DATA line (GPIO 2 by default)
-- The UART output should be inverted for proper operation. This can be done in hardware with an inverter, or by configuring the RP2040 UART peripheral for inverted TX
-- UART mode uses the same DATA pin as bit-banging mode, so no wiring changes are required
+- The UART TX pin (GPIO 2 by default) should be connected to the DATA line
+- **Important:** The UART output must be inverted for proper operation. This can be achieved with:
+  - A simple transistor inverter circuit (e.g., NPN transistor with base resistor) between the UART TX pin and the DATA line, OR
+  - A logic inverter IC (e.g., 74HC04) if you prefer
+- No wiring changes are required compared to bit-banging mode - just add the inverter circuit
+- The inversion is necessary because UART idle state is HIGH, but the PlayStation expects an inverted signal
 
 ## Building
 
